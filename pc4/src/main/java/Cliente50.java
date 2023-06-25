@@ -13,6 +13,7 @@ class Cliente50 {
         Cliente50 objcli = new Cliente50();
         objcli.iniciar();
     }
+
     void iniciar() {
         new Thread(
                 () -> {
@@ -40,20 +41,21 @@ class Cliente50 {
 
             boolean shaEncontrado = Boolean.parseBoolean(arrayString[4]);
             String palabra = arrayString[1];
-            if(!shaEncontrado){
+            if (!shaEncontrado) {
                 int dificultad = Integer.parseInt(arrayString[2]);
                 int nroMinero = Integer.parseInt(arrayString[3]);
-                procesar(palabra, dificultad,nroMinero);
+                procesar(palabra, dificultad, nroMinero);
             }
-            if(shaEncontrado) {
+            if (shaEncontrado) {
                 String sha = arrayString[2];
                 String nonce = arrayString[3];
                 int nroMinero = 3;
-                verifica(palabra,sha,nonce, nroMinero);
+                verifica(palabra, sha, nonce, nroMinero);
             }
 
         }
     }
+
 
     void ClienteEnvia(String envia) {
 
@@ -63,32 +65,55 @@ class Cliente50 {
         }
     }
 
-    void verifica(String palabra, String sha, String nonce, int nroMinero){
+    void verifica(String palabra, String sha, String nonce, int nroMinero) {
 
-        Miner miner = new Miner(palabra,nonce);
+        Miner miner = new Miner(palabra, nonce);
         String shaGenerado = miner.getHash();
-        if(shaGenerado.equals(sha)) ClienteEnvia("rpta -> Minero: " +nroMinero+" "+miner.getElapsedSeconds()+" "+miner.getResult()+" "+miner.getNonce()+" "+miner.getWord()+" "+true);
-        else ClienteEnvia("rpta -> Minero: " +nroMinero+" "+miner.getElapsedSeconds()+" "+miner.getResult()+" "+miner.getNonce()+" "+miner.getWord()+" "+true);
+        if (shaGenerado.equals(sha))
+            ClienteEnvia("rpta -> Minero: " + nroMinero + " " + miner.getElapsedSeconds() + " " + miner.getResult() + " " + miner.getNonce() + " " + miner.getWord() + " " + true);
+        else
+            ClienteEnvia("rpta -> Minero: " + nroMinero + " " + miner.getElapsedSeconds() + " " + miner.getResult() + " " + miner.getNonce() + " " + miner.getWord() + " " + true);
 
     }
+
+    /*  void procesar(String palabra, int dificultad, int nroMinero) {
+
+          Miner miner = new Miner(palabra, dificultad);
+          Thread thread = new Thread(miner);
+          thread.start();
+          try {
+
+              thread.join();
+
+          } catch (InterruptedException e) {
+
+              e.printStackTrace();
+
+          }
+          ClienteEnvia("rpta -> Minero: " +nroMinero+" "+miner.getElapsedSeconds()+" "+miner.getResult()+" "+miner.getNonce()+" "+miner.getWord()+" "+true);
+
+      }
+
+     */
     void procesar(String palabra, int dificultad, int nroMinero) {
+        Miner[] miners = new Miner[6];
+        Thread[] threads = new Thread[6];
 
-        Miner miner = new Miner(palabra, dificultad);
-        Thread thread = new Thread(miner);
-        thread.start();
-        try {
-
-            thread.join();
-
-        } catch (InterruptedException e) {
-
-            e.printStackTrace();
-
+        for (int i = 0; i < 6; i++) {
+            miners[i] = new Miner(palabra, dificultad);
+            threads[i] = new Thread(miners[i]);
+            threads[i].start();
         }
-        ClienteEnvia("rpta -> Minero: " +nroMinero+" "+miner.getElapsedSeconds()+" "+miner.getResult()+" "+miner.getNonce()+" "+miner.getWord()+" "+true);
 
+        try {
+            for (int i = 0; i < 6; i++) {
+                threads[i].join();
+                ClienteEnvia("rpta -> Minero: " + nroMinero + " " + miners[i].getElapsedSeconds() + " " + miners[i].getResult() + " " + miners[i].getNonce() + " " + miners[i].getWord() + " " + true);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
-
 }
 
 class Miner implements Runnable {

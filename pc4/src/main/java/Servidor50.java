@@ -86,6 +86,8 @@ public class Servidor50 {
     double sumclient = 0;
 
     void ServidorRecibe(String llego) {
+        System.out.println(llego);
+
         boolean shaEncontrado = this.shaEncontrado;
         if (llego != null && !llego.equals("")) {
             if (llego.trim().contains("rpta")) {
@@ -93,7 +95,7 @@ public class Servidor50 {
 
                 if (!shaEncontrado) {
 
-                     for( int i =1; i<=3;i++) {
+                     for( int i =1; i<=1;i++) {
                          mTcpServer.pararClientes(i);
 
                      }
@@ -109,6 +111,12 @@ public class Servidor50 {
 
                 if(contador<palabras.size()) mTcpServer.sendMessageTCPServerRango(palabras.get(contador),dificultad , false,true);
 
+                if(contador==palabras.size()){
+                    for( int i =1; i<=2;i++) {
+                        mTcpServer.pararClientes(i);
+
+                    }
+                }
 
             }
     }

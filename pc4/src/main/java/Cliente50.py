@@ -5,6 +5,8 @@ import re
 import socket
 import threading
 
+sumaarray = [0] * 40
+
 class TCPClient50:
     def __init__(self, ip, listener):
         self.servermsj = None
@@ -41,7 +43,7 @@ class TCPClient50:
                         self.mMessageListener(self.servermsj)
                     self.servermsj = None
             except Exception as e:
-                print("Minero en python trabajando")
+                print("TCP - S: Error", e)
             finally:
                 clientSocket.close()
         except Exception as e:
@@ -68,26 +70,24 @@ class Cliente50:
         thread = threading.Thread(target=run)
         thread.start()
 
+        salir = "n"
+        self.sc = input()
         print("Cliente bandera 01")
-        while True:
-            salir = input()
+        while salir != "s":
+            salir = self.sc.nextLine()
             self.ClienteEnvia(salir)
-            if salir == "s":
-                break
         print("Cliente bandera 02")
 
-
-    def ClienteRecibe(self,llego):
+    def ClienteRecibe(self, llego):
         if "evalua" in llego.strip():
             arrayString = llego.split()
-            shaEncontrado = bool(arrayString[4] != "")
-
+            shaEncontrado = bool(arrayString[4])
             palabra = arrayString[1]
-            if not shaEncontrado:
+            if shaEncontrado:
                 dificultad = int(arrayString[2])
                 nroMinero = int(arrayString[3])
                 self.procesar(palabra, dificultad, nroMinero)
-            else:
+            if not shaEncontrado:
                 sha = arrayString[2]
                 nonce = arrayString[3]
                 nroMinero = 3
@@ -98,32 +98,36 @@ class Cliente50:
             self.mTcpClient.sendMessage(envia)
 
 
-    def verifica(self,palabra, sha, nonce, nroMinero):
+    def verifica(self, palabra, sha, nonce, nroMinero):
         miner = Miner(palabra, nonce)
         shaGenerado = miner.getHash()
-        elapsedSeconds = miner.getElapsedSeconds() or 0
-        result = miner.getResult() or ""
-        nonceValue = miner.getNonce() or ""
-        wordValue = miner.getWord() or ""
+
         if shaGenerado == sha:
-            self.ClienteEnvia(f"rpta -> Minero: {nroMinero or ''} {elapsedSeconds or 0} {result or ''} {nonceValue or ''} {wordValue or ''} True")
+            self.ClienteEnvia("rpta -> Minero: " + str(nroMinero or '') + " " + str(miner.getElapsedSeconds() or 0) + " " + str(miner.getResult() or '') + " " + str(miner.getNonce() or '') + " " + str(miner.getWord() or '') + " True")
+
         else:
-            self.ClienteEnvia(f"rpta -> Minero: {nroMinero or ''} {elapsedSeconds or 0} {result or ''} {nonceValue or ''} {wordValue or ''} True")
+            self.ClienteEnvia("rpta -> Minero: " + str(nroMinero or '') + " " + str(miner.getElapsedSeconds() or 0) + " " + str(miner.getResult() or '') + " " + str(miner.getNonce() or '') + " " + str(miner.getWord() or '') + " True")
 
 
     def procesar(self,palabra, dificultad, nroMinero):
-        miner = Miner(palabra, dificultad)
-        thread = Thread(target=miner.run)
-        thread.start()
+        miners = []
+        threads = []
+
+        for i in range(6):
+            miner = Miner(palabra, dificultad)
+            miners.append(miner)
+            thread = threading.Thread(target=miner.run)
+            threads.append(thread)
+            thread.start()
+
         try:
-            thread.join()
+            for i in range(6):
+                threads[i].join()
+                self.ClienteEnvia("rpta -> Minero: " + str(nroMinero) + " " + str(miners[i].getElapsedSeconds()) + " " + miners[i].getResult() + " " + miners[i].getNonce() + " " + miners[i].getWord() + " " + "True")
+
         except Exception as e:
-            print(e)
-        elapsedSeconds = miner.getElapsedSeconds() or 0
-        result = miner.getResult() or ""
-        nonceValue = miner.getNonce() or ""
-        wordValue = miner.getWord() or ""
-        self.ClienteEnvia(f"rpta -> Minero: {nroMinero or ''} {elapsedSeconds or 0} {result or ''} {nonceValue or ''} {wordValue or ''} True")
+                print(e)
+
 
 
 
@@ -132,15 +136,16 @@ import random
 import string
 import time
 
-class Miner:
+class Miner(threading.Thread):
     def __init__(self, serverWord, difficulty):
+        threading.Thread.__init__(self)
         self.serverWord = serverWord
         self.difficulty = difficulty
-        self.word = None
-        self.nonce = None
-        self.result = None
-        self.startTime = None
-        self.endTime = None
+        self.word = ""
+        self.nonce = ""
+        self.result = ""
+        self.startTime = 0
+        self.endTime = 0
 
     def run(self):
         self.startTime = time.time()
@@ -183,6 +188,7 @@ class Miner:
         if self.endTime is None:
             return 0
         return self.endTime - self.startTime
+
 
 # Ejecutar el programa
 cliente = Cliente50()

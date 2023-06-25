@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/pc4/parcial.iml" filepath="$PROJECT_DIR$/pc4/parcial.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/pc4_concurrentes.iml" filepath="$PROJECT_DIR$/.idea/pc4_concurrentes.iml" />
+    </modules>
+  </component>
+</project>
