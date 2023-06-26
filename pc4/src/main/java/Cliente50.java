@@ -75,38 +75,18 @@ class Cliente50 {
             ClienteEnvia("rpta -> Minero: " + nroMinero + " " + miner.getElapsedSeconds() + " " + miner.getResult() + " " + miner.getNonce() + " " + miner.getWord() + " " + true);
 
     }
+    void procesar(String palabra, int dificultad, int nroMinero) { // implementacion para 8 hilos
+        Miner[] miners = new Miner[8];
+        Thread[] threads = new Thread[8];
 
-    /*  void procesar(String palabra, int dificultad, int nroMinero) {
-
-          Miner miner = new Miner(palabra, dificultad);
-          Thread thread = new Thread(miner);
-          thread.start();
-          try {
-
-              thread.join();
-
-          } catch (InterruptedException e) {
-
-              e.printStackTrace();
-
-          }
-          ClienteEnvia("rpta -> Minero: " +nroMinero+" "+miner.getElapsedSeconds()+" "+miner.getResult()+" "+miner.getNonce()+" "+miner.getWord()+" "+true);
-
-      }
-
-     */
-    void procesar(String palabra, int dificultad, int nroMinero) {
-        Miner[] miners = new Miner[6];
-        Thread[] threads = new Thread[6];
-
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 8; i++) {
             miners[i] = new Miner(palabra, dificultad);
             threads[i] = new Thread(miners[i]);
             threads[i].start();
         }
 
         try {
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < 8; i++) {
                 threads[i].join();
                 ClienteEnvia("rpta -> Minero: " + nroMinero + " " + miners[i].getElapsedSeconds() + " " + miners[i].getResult() + " " + miners[i].getNonce() + " " + miners[i].getWord() + " " + true);
             }

@@ -95,7 +95,7 @@ public class Servidor50 {
 
                 if (!shaEncontrado) {
 
-                     for( int i =1; i<=1;i++) {
+                     for( int i =1; i<=2;i++) {
                          mTcpServer.pararClientes(i);
 
                      }

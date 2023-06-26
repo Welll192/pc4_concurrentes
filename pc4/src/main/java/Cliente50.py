@@ -109,11 +109,11 @@ class Cliente50:
             self.ClienteEnvia("rpta -> Minero: " + str(nroMinero or '') + " " + str(miner.getElapsedSeconds() or 0) + " " + str(miner.getResult() or '') + " " + str(miner.getNonce() or '') + " " + str(miner.getWord() or '') + " True")
 
 
-    def procesar(self,palabra, dificultad, nroMinero):
+    def procesar(self,palabra, dificultad, nroMinero): # implementacion para 8 hilos
         miners = []
         threads = []
 
-        for i in range(6):
+        for i in range(8):
             miner = Miner(palabra, dificultad)
             miners.append(miner)
             thread = threading.Thread(target=miner.run)
@@ -121,7 +121,7 @@ class Cliente50:
             thread.start()
 
         try:
-            for i in range(6):
+            for i in range(8):
                 threads[i].join()
                 self.ClienteEnvia("rpta -> Minero: " + str(nroMinero) + " " + str(miners[i].getElapsedSeconds()) + " " + miners[i].getResult() + " " + miners[i].getNonce() + " " + miners[i].getWord() + " " + "True")
 
